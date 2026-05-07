@@ -1,10 +1,10 @@
 // ===== 設定 =====
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwXthMihT2LwhUXBD3IawKn2XuQh-VsfVm6F-9_3pgsMJ6dncAoxMi0ooDNVJ8raZ1vfA/exec'; // ★ここを変更
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwXthMihT2LwhUXBD3IawKn2XuQh-VsfVm6F-9_3pgsMJ6dncAoxMi0ooDNVJ8raZ1vfA/exec';
 const KEY_PART1 = 'UUDDL';
 const KEY_PART2 = 'RLRBA';
 const ENCRYPTION_KEY = KEY_PART1 + KEY_PART2;
 
-// ===== セッションID =====
+// ===== セッション ID =====
 const sessionId = sessionStorage.getItem('mendang_id') || crypto.randomUUID().slice(0, 8);
 sessionStorage.setItem('mendang_id', sessionId);
 const DISPLAY_NAME = `名無しさん@${sessionId}`;
@@ -17,15 +17,19 @@ const closeBtn = document.getElementById('close-help');
 helpBtn.addEventListener('click', () => {
   modal.style.display = 'flex';
 });
+
 closeBtn.addEventListener('click', () => {
   modal.style.display = 'none';
 });
+
 // モーダル外クリックでも閉じる（オーバーレイ部分）
 modal.addEventListener('click', (e) => {
-  if (e.target === modal) modal.style.display = 'none';
+  if (e.target === modal) {
+    modal.style.display = 'none';
+  }
 });
 
-// ===== 緊急脱出（Escキー）=====
+// ===== 緊急脱出（Esc キー）=====
 // モーダルが開いていれば閉じるだけ、閉じていれば緊急脱出
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
@@ -48,6 +52,7 @@ document.getElementById('submit').addEventListener('click', () => {
   form.method = 'POST';
   form.action = GAS_URL;
   form.target = 'hidden_iframe';
+
   const input = document.createElement('input');
   input.type = 'hidden';
   input.name = 'message';
@@ -69,7 +74,7 @@ function fetchPosts() {
     container.innerHTML = '';
     if (!Array.isArray(data)) return;
 
-    data.forEach(item => {
+    data.forEach((item) => {
       try {
         const bytes = CryptoJS.AES.decrypt(item.message, ENCRYPTION_KEY);
         const plain = bytes.toString(CryptoJS.enc.Utf8);
@@ -83,7 +88,9 @@ function fetchPosts() {
           <div class="post-body">${escapeHtml(plain)}</div>
         `;
         container.appendChild(div);
-      } catch (e) {}
+      } catch (e) {
+        // エラーは無視
+      }
     });
     delete window[cb];
   };
@@ -94,10 +101,16 @@ function fetchPosts() {
   script.onload = () => script.remove();
 }
 
-// 簡易XSS対策
+// 簡易 XSS 対策
 function escapeHtml(text) {
-  const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-  return text.replace(/[&<>"']/g, c => map[c]);
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return text.replace(/[&<>"']/g, (c) => map[c]);
 }
 
 // 初回読み込み
