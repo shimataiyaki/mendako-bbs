@@ -1,2 +1,0 @@
-# mendako-bbs
-BBS
